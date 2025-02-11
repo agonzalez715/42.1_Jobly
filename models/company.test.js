@@ -206,3 +206,17 @@ describe("remove", function () {
     }
   });
 });
+
+/*************************************** */
+// tests/companies.test.js or tests/users.test.js
+
+describe("POST /companies", function () {
+  test("not allowed for non-admin users", async function () {
+    const resp = await request(app)
+        .post("/companies")
+        .send(newCompany)
+        .set("authorization", `Bearer ${u1Token}`);  // Assuming u1Token is not an admin
+    expect(resp.statusCode).toEqual(401);
+    expect(resp.body.error.message).toEqual("Must be an admin");
+  });
+});

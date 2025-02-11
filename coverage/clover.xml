@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<coverage generated="1739245181781" clover="3.2.0">
+  <project timestamp="1739245181782" name="All files">
+    <metrics statements="13" coveredstatements="1" conditionals="10" coveredconditionals="0" methods="1" coveredmethods="0" elements="24" coveredelements="1" complexity="0" loc="13" ncloc="13" packages="1" files="1" classes="1"/>
+    <file name="config.js" path="/Users/alejandrogonzalez/Library/CloudStorage/GoogleDrive-gonzalezalejandro715@gmail.com/My Drive/All Springboard Files/Core-Career-Track/BackEnd/42_Jobly/Code_Files/config.js">
+      <metrics statements="13" coveredstatements="1" conditionals="10" coveredconditionals="0" methods="1" coveredmethods="0"/>
+      <line num="5" count="1" type="stmt"/>
+      <line num="6" count="0" type="stmt"/>
+      <line num="8" count="0" type="cond" truecount="0" falsecount="2"/>
+      <line num="10" count="0" type="cond" truecount="0" falsecount="2"/>
+      <line num="14" count="0" type="cond" truecount="0" falsecount="2"/>
+      <line num="22" count="0" type="cond" truecount="0" falsecount="2"/>
+      <line num="24" count="0" type="stmt"/>
+      <line num="25" count="0" type="stmt"/>
+      <line num="26" count="0" type="stmt"/>
+      <line num="27" count="0" type="stmt"/>
+      <line num="28" count="0" type="stmt"/>
+      <line num="29" count="0" type="stmt"/>
+      <line num="31" count="0" type="stmt"/>
+    </file>
+  </project>
+</coverage>

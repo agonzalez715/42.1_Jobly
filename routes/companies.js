@@ -6,7 +6,7 @@ const jsonschema = require("jsonschema");
 const express = require("express");
 
 const { BadRequestError } = require("../expressError");
-const { ensureLoggedIn } = require("../middleware/auth");
+const { ensureLoggedIn, ensureAdmin } = require("../middleware/auth"); // Import ensureAdmin middleware
 const Company = require("../models/company");
 
 const companyNewSchema = require("../schemas/companyNew.json");
@@ -14,17 +14,16 @@ const companyUpdateSchema = require("../schemas/companyUpdate.json");
 
 const router = new express.Router();
 
-
 /** POST / { company } =>  { company }
  *
  * company should be { handle, name, description, numEmployees, logoUrl }
  *
  * Returns { handle, name, description, numEmployees, logoUrl }
  *
- * Authorization required: login
+ * Authorization required: admin
  */
 
-router.post("/", ensureLoggedIn, async function (req, res, next) {
+router.post("/", ensureLoggedIn, ensureAdmin, async function (req, res, next) { // Added ensureAdmin middleware
   try {
     const validator = jsonschema.validate(req.body, companyNewSchema);
     if (!validator.valid) {
@@ -43,26 +42,39 @@ router.post("/", ensureLoggedIn, async function (req, res, next) {
  *   { companies: [ { handle, name, description, numEmployees, logoUrl }, ...] }
  *
  * Can filter on provided search filters:
+ * - name (case-insensitive, partial matches)
  * - minEmployees
  * - maxEmployees
- * - nameLike (will find case-insensitive, partial matches)
  *
  * Authorization required: none
  */
 
 router.get("/", async function (req, res, next) {
+  const { name, minEmployees, maxEmployees } = req.query;
+
+  // Validate minEmployees and maxEmployees
+  if (minEmployees && maxEmployees && parseInt(minEmployees) > parseInt(maxEmployees)) {
+    return next(new BadRequestError("minEmployees cannot be greater than maxEmployees"));
+  }
+
+  // Construct the filters object
+  const filters = {};
+  if (name) filters.name = name;
+  if (minEmployees) filters.minEmployees = parseInt(minEmployees);
+  if (maxEmployees) filters.maxEmployees = parseInt(maxEmployees);
+
   try {
-    const companies = await Company.findAll();
+    const companies = await Company.findAll(filters);
     return res.json({ companies });
   } catch (err) {
     return next(err);
   }
 });
 
-/** GET /[handle]  =>  { company }
+/** GET /[handle] => { company }
  *
- *  Company is { handle, name, description, numEmployees, logoUrl, jobs }
- *   where jobs is [{ id, title, salary, equity }, ...]
+ * Company is { handle, name, description, numEmployees, logoUrl, jobs }
+ * where jobs is [{ id, title, salary, equity }, ...]
  *
  * Authorization required: none
  */
@@ -84,10 +96,10 @@ router.get("/:handle", async function (req, res, next) {
  *
  * Returns { handle, name, description, numEmployees, logo_url }
  *
- * Authorization required: login
+ * Authorization required: admin
  */
 
-router.patch("/:handle", ensureLoggedIn, async function (req, res, next) {
+router.patch("/:handle", ensureLoggedIn, ensureAdmin, async function (req, res, next) { // Added ensureAdmin middleware
   try {
     const validator = jsonschema.validate(req.body, companyUpdateSchema);
     if (!validator.valid) {
@@ -102,12 +114,14 @@ router.patch("/:handle", ensureLoggedIn, async function (req, res, next) {
   }
 });
 
-/** DELETE /[handle]  =>  { deleted: handle }
+/** DELETE /[handle] => { deleted: handle }
  *
- * Authorization: login
+ * Deletes a company.
+ *
+ * Authorization required: admin
  */
 
-router.delete("/:handle", ensureLoggedIn, async function (req, res, next) {
+router.delete("/:handle", ensureLoggedIn, ensureAdmin, async function (req, res, next) { // Added ensureAdmin middleware
   try {
     await Company.remove(req.params.handle);
     return res.json({ deleted: req.params.handle });
@@ -115,6 +129,5 @@ router.delete("/:handle", ensureLoggedIn, async function (req, res, next) {
     return next(err);
   }
 });
-
 
 module.exports = router;
