@@ -1,6 +1,6 @@
 "use strict";
 
-const db = require("../db");
+const db = require("./db");
 const { BadRequestError, NotFoundError } = require("../expressError");
 const { sqlForPartialUpdate } = require("../helpers/sql");
 
@@ -61,31 +61,42 @@ class Company {
     return companiesRes.rows;
   }
 
-  /** Given a company handle, return data about company.
-   *
-   * Returns { handle, name, description, numEmployees, logoUrl, jobs }
-   *   where jobs is [{ id, title, salary, equity, companyHandle }, ...]
-   *
-   * Throws NotFoundError if not found.
-   **/
+/** Given a company handle, return data about company.
+ *
+ * Returns { handle, name, description, numEmployees, logoUrl, jobs }
+ *   where jobs is [{ id, title, salary, equity, companyHandle }, ...]
+ *
+ * Throws NotFoundError if not found.
+ **/
 
-  static async get(handle) {
-    const companyRes = await db.query(
-          `SELECT handle,
-                  name,
-                  description,
-                  num_employees AS "numEmployees",
-                  logo_url AS "logoUrl"
-           FROM companies
-           WHERE handle = $1`,
-        [handle]);
+static async get(handle) {
+  const companyRes = await db.query(
+        `SELECT handle,
+                name,
+                description,
+                num_employees AS "numEmployees",
+                logo_url AS "logoUrl"
+         FROM companies
+         WHERE handle = $1`,
+      [handle]);
 
-    const company = companyRes.rows[0];
+  const company = companyRes.rows[0];
 
-    if (!company) throw new NotFoundError(`No company: ${handle}`);
+  if (!company) throw new NotFoundError(`No company: ${handle}`);
 
-    return company;
-  }
+  // Query to fetch jobs associated with the company
+  const jobsRes = await db.query(
+        `SELECT id, title, salary, equity, company_handle AS "companyHandle"
+         FROM jobs
+         WHERE company_handle = $1`,
+      [handle]);
+
+  // Attach jobs to the company object
+  company.jobs = jobsRes.rows;
+
+  return company;
+}
+
 
   /** Update company data with `data`.
    *

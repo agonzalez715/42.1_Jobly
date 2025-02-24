@@ -6,7 +6,8 @@ const jsonschema = require("jsonschema");
 const express = require("express");
 
 const { BadRequestError } = require("../expressError");
-const { ensureLoggedIn, ensureAdmin } = require("../middleware/auth"); // Import ensureAdmin middleware
+const { ensureLoggedIn } = require("../middleware/auth");
+const { ensureAdmin } = require("../middleware/authAdmin");
 const Company = require("../models/company");
 
 const companyNewSchema = require("../schemas/companyNew.json");
@@ -64,7 +65,8 @@ router.get("/", async function (req, res, next) {
   if (maxEmployees) filters.maxEmployees = parseInt(maxEmployees);
 
   try {
-    const companies = await Company.findAll(filters);
+    const companies = await Co
+    mpany.findAll(filters);
     return res.json({ companies });
   } catch (err) {
     return next(err);
