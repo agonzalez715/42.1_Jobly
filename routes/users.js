@@ -4,7 +4,8 @@
 
 const jsonschema = require("jsonschema");
 const express = require("express");
-const { ensureLoggedIn, ensureAdmin, ensureUserOrAdmin } = require("../middleware/auth"); // Include new middleware
+const { ensureLoggedIn } = require("../middleware/auth"); // Include new middleware
+const ensureAdmin = require("../middleware/authAdmin");
 const { BadRequestError } = require("../expressError");
 const User = require("../models/user");
 const { createToken } = require("../helpers/tokens");
@@ -64,7 +65,7 @@ router.get("/", ensureLoggedIn, ensureAdmin, async function (req, res, next) { /
  * Authorization required: user or admin
  **/
 
-router.get("/:username", ensureLoggedIn, ensureUserOrAdmin, async function (req, res, next) { // Require specific user or admin
+router.get("/:username", ensureLoggedIn, async function (req, res, next) { // Require specific user or admin
   try {
     const user = await User.get(req.params.username);
     return res.json({ user });
@@ -83,7 +84,7 @@ router.get("/:username", ensureLoggedIn, ensureUserOrAdmin, async function (req,
  * Authorization required: user or admin
  **/
 
-router.patch("/:username", ensureLoggedIn, ensureUserOrAdmin, async function (req, res, next) { // Require specific user or admin
+router.patch("/:username", ensureLoggedIn, async function (req, res, next) { // Require specific user or admin
   try {
     const validator = jsonschema.validate(req.body, userUpdateSchema);
     if (!validator.valid) {
@@ -103,7 +104,7 @@ router.patch("/:username", ensureLoggedIn, ensureUserOrAdmin, async function (re
  * Authorization required: user or admin
  **/
 
-router.delete("/:username", ensureLoggedIn, ensureUserOrAdmin, async function (req, res, next) { // Require specific user or admin
+router.delete("/:username", ensureLoggedIn, async function (req, res, next) { // Require specific user or admin
   try {
     await User.remove(req.params.username);
     return res.json({ deleted: req.params.username });
