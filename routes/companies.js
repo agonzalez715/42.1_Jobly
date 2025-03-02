@@ -65,8 +65,7 @@ router.get("/", async function (req, res, next) {
   if (maxEmployees) filters.maxEmployees = parseInt(maxEmployees);
 
   try {
-    const companies = await Co
-    mpany.findAll(filters);
+    const companies = await Company.findAll(filters);
     return res.json({ companies });
   } catch (err) {
     return next(err);
